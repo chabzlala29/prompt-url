@@ -32,4 +32,17 @@ RSpec.describe 'FetchUrl' do
       end
     end
   end
+
+  context 'when url having a relative path' do
+    let(:urls) { ['https://facebook.com/chabzpobre'] }
+    let(:expected_result) { ['facebook.com_chabzpobre.html'] }
+
+    it 'should still generate an HTML file' do
+      expect(response).to eq expected_result
+
+      expected_result.each do |file|
+        expect(File.exists?(base_dir + "/#{file}"))
+      end
+    end
+  end
 end

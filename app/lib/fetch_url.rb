@@ -18,12 +18,18 @@ class FetchUrl
     puts 'Generating HTML files of the following urls: '
     @urls.map do |url|
       uri = URI.parse(url)
+
       domain = if uri.is_a?(URI::HTTPS) || uri.is_a?(URI::HTTP)
                  uri.host
                else
                  uri.to_s
                end
+
+      # String#present? not existing on native ruby but empty does.
+      domain = merge_relative_path!(domain, uri)
+
       url = "https://#{url}" unless uri.is_a?(URI::HTTPS) || uri.is_a?(URI::HTTP)
+
       filename = domain + '.html'
 
       html_content = fetch_html_from_url(url)
@@ -63,6 +69,14 @@ class FetchUrl
     end
 
     html_content
+  end
+
+  def merge_relative_path!(domain, uri)
+    if uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
+      domain + uri.path.gsub(/\//, '_')
+    else
+      domain.gsub(/\//, '_')
+    end
   end
 
   def validate_urls!
