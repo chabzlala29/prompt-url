@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/fetch_url"
+
+fetch_url = FetchUrl.new(urls: ARGV)
+fetch_url.generate_html_files!

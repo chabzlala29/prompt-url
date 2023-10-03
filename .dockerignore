@@ -1,0 +1,4 @@
+.git/
+spec/
+*.Dockerfile
+README.md
