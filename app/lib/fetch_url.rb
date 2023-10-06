@@ -7,11 +7,17 @@ require 'pry'
 class FetchUrl
   DEFAULT_FILE_EXT = 'html'.freeze
 
-  attr_reader :urls, :file_ext, :base_dir
+  OPTION_FLAGS = {
+    metadata: '--metadata'
+  }
 
-  def initialize(urls: [], file_ext: DEFAULT_FILE_EXT, base_dir: Dir.pwd)
+  attr_reader :urls, :file_ext, :base_dir, :options, :metadata
+
+  def initialize(urls: [], file_ext: DEFAULT_FILE_EXT, base_dir: Dir.pwd, options: {})
     @urls, @file_ext, @base_dir = urls, file_ext, base_dir
+    @options = options
 
+    generate_options!
     validate_urls!
   end
 
@@ -19,16 +25,10 @@ class FetchUrl
     @urls.map do |url|
       uri = URI.parse(url)
 
-      domain = if uri.is_a?(URI::HTTPS) || uri.is_a?(URI::HTTP)
-                 uri.host
-               else
-                 uri.to_s
-               end
+      domain = uri.host
 
       # String#present? not existing on native ruby but empty does.
       domain = merge_relative_path!(domain, uri)
-
-      url = "https://#{url}" unless uri.is_a?(URI::HTTPS) || uri.is_a?(URI::HTTP)
 
       filename = domain + '.html'
 
@@ -46,6 +46,10 @@ class FetchUrl
         filename: filename
       )
     end
+  end
+
+  def metadata
+    @metadata ||= metadata
   end
 
   private
@@ -67,11 +71,7 @@ class FetchUrl
   end
 
   def merge_relative_path!(domain, uri)
-    if uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
-      domain + uri.path.gsub(/\//, '_')
-    else
-      domain.gsub(/\//, '_')
-    end
+    domain + uri.path.gsub(/\//, '_')
   end
 
   def calculate_stats(html_content:, uri:, filename:)
@@ -85,7 +85,13 @@ class FetchUrl
     )
   end
 
+  def generate_options!
+    @metadata = options.include?(OPTION_FLAGS[:metadata])
+  end
 
   def validate_urls!
+    if urls.map { |url| !URI.parse(url).host.nil? }.include?(false)
+      raise StandardError, "One of the URL is invalid."
+    end
   end
 end

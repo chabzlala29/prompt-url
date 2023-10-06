@@ -2,5 +2,10 @@
 
 require_relative "../lib/fetch_url"
 
-fetch_url = FetchUrl.new(urls: ARGV)
+# Fetch options
+options = ARGV.select{ |arg| arg.match('--') }
+# Fetch the rest
+urls = ARGV.select{ |arg| !arg.match('--') }
+
+fetch_url = FetchUrl.new(urls: urls, options: options)
 fetch_url.generate_html_files!

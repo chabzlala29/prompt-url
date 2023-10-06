@@ -25,11 +25,7 @@ RSpec.describe 'FetchUrl' do
     let(:urls) { ['google.com', 'https://facebook.com', 'https://instagram.com'] }
 
     it 'should still generate those files' do
-      expect(response.map(&:filename)).to eq expected_result
-
-      expected_result.each do |file|
-        expect(File.exists?(base_dir + "/#{file}"))
-      end
+      expect { response }.to raise_error('One of the URL is invalid.')
     end
   end
 
