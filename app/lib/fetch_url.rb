@@ -48,10 +48,6 @@ class FetchUrl
     end
   end
 
-  def metadata
-    @metadata ||= metadata
-  end
-
   private
 
   def fetch_html_from_url(url)
@@ -77,12 +73,22 @@ class FetchUrl
   def calculate_stats(html_content:, uri:, filename:)
     doc = Nokogiri::HTML(html_content)
 
-    OpenStruct.new(
+    stats = OpenStruct.new(
       links: doc.css('a'),
       images: doc.css('img'),
       domain: uri.host,
-      filename: filename
+      filename: filename,
+      last_fetched: Time.now.utc
     )
+
+    if metadata
+      puts "site: #{stats.domain}"
+      puts "num_links: #{stats.links.size}"
+      puts "images: #{stats.images.size}"
+      puts "last_fetch: #{stats.last_fetched.strftime('%c')}"
+    end
+
+    stats
   end
 
   def generate_options!
