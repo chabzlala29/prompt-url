@@ -25,12 +25,7 @@ class FetchUrl
     @urls.map do |url|
       uri = URI.parse(url)
 
-      domain = uri.host
-
-      # String#present? not existing on native ruby but empty does.
-      domain = merge_relative_path!(domain, uri)
-
-      filename = domain + '.html'
+      filename = generate_domain_fname(uri)
 
       html_content = fetch_html_from_url(url)
 
@@ -64,6 +59,11 @@ class FetchUrl
     end
 
     html_content
+  end
+
+  def generate_domain_fname(uri)
+    # String#present? not existing on native ruby but empty does.
+    merge_relative_path!(uri.host, uri) + '.html'
   end
 
   def merge_relative_path!(domain, uri)
