@@ -1,2 +1,4 @@
 .bundle/
 tmp/
+vendor/
+*.html

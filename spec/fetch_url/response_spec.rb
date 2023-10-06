@@ -14,7 +14,7 @@ RSpec.describe 'FetchUrl' do
   end
 
   it 'should generate files' do
-    expect(response).to eq ['google.com.html', 'facebook.com.html', 'instagram.com.html']
+    expect(response.map(&:filename)).to eq ['google.com.html', 'facebook.com.html', 'instagram.com.html']
 
     expected_result.each do |file|
       expect(File.exists?(base_dir + "/#{file}"))
@@ -25,7 +25,7 @@ RSpec.describe 'FetchUrl' do
     let(:urls) { ['google.com', 'https://facebook.com', 'https://instagram.com'] }
 
     it 'should still generate those files' do
-      expect(response).to eq expected_result
+      expect(response.map(&:filename)).to eq expected_result
 
       expected_result.each do |file|
         expect(File.exists?(base_dir + "/#{file}"))
@@ -38,7 +38,7 @@ RSpec.describe 'FetchUrl' do
     let(:expected_result) { ['facebook.com_chabzpobre.html'] }
 
     it 'should still generate an HTML file' do
-      expect(response).to eq expected_result
+      expect(response.map(&:filename)).to eq expected_result
 
       expected_result.each do |file|
         expect(File.exists?(base_dir + "/#{file}"))

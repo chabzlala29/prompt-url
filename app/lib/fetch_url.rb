@@ -1,6 +1,7 @@
 require 'open-uri'
 require 'net/http'
 require 'fileutils'
+require 'nokogiri'
 require 'pry'
 
 class FetchUrl
@@ -15,7 +16,6 @@ class FetchUrl
   end
 
   def generate_html_files!
-    puts 'Generating HTML files of the following urls: '
     @urls.map do |url|
       uri = URI.parse(url)
 
@@ -40,9 +40,11 @@ class FetchUrl
         file.puts html_content
       end
 
-      puts "Generated HTML file for #{url}"
-
-      filename
+      calculate_stats(
+        html_content: html_content,
+        uri: uri,
+        filename: filename
+      )
     end
   end
 
@@ -57,14 +59,7 @@ class FetchUrl
       if e.message =~ /^301/
         # The URL has been moved permanently; get the new location
         new_location = e.io.meta['location']
-        if new_location
-          puts "Following redirect to: #{new_location}"
-          html_content = open(new_location).read
-        else
-          puts "No redirect location found."
-        end
-      else
-        puts "Error fetching the URL: #{e.message}"
+        html_content = open(new_location).read if new_location
       end
     end
 
@@ -78,6 +73,18 @@ class FetchUrl
       domain.gsub(/\//, '_')
     end
   end
+
+  def calculate_stats(html_content:, uri:, filename:)
+    doc = Nokogiri::HTML(html_content)
+
+    OpenStruct.new(
+      links: doc.css('a'),
+      images: doc.css('img'),
+      domain: uri.host,
+      filename: filename
+    )
+  end
+
 
   def validate_urls!
   end
