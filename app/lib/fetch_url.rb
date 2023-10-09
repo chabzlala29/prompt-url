@@ -1,8 +1,8 @@
 require 'open-uri'
 require 'net/http'
 require 'fileutils'
-require 'nokogiri'
 require 'ostruct'
+require_relative '../models/html_stat'
 
 class FetchUrl
   DEFAULT_FILE_EXT = 'html'.freeze
@@ -71,24 +71,12 @@ class FetchUrl
   end
 
   def calculate_stats(html_content:, uri:, filename:)
-    doc = Nokogiri::HTML(html_content)
-
-    stats = OpenStruct.new(
-      links: doc.css('a'),
-      images: doc.css('img'),
-      domain: uri.host,
+    HtmlStat.new(
+      html_content: html_content,
+      uri: uri,
       filename: filename,
-      last_fetched: Time.now.utc
-    )
-
-    if metadata
-      puts "site: #{stats.domain}"
-      puts "num_links: #{stats.links.size}"
-      puts "images: #{stats.images.size}"
-      puts "last_fetch: #{stats.last_fetched.strftime('%c')}"
-    end
-
-    stats
+      show_metadata: @metadata
+    ).calculate
   end
 
   def generate_options!
