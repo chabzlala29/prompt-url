@@ -2,7 +2,7 @@ require 'open-uri'
 require 'net/http'
 require 'fileutils'
 require 'nokogiri'
-require 'pry'
+require 'ostruct'
 
 class FetchUrl
   DEFAULT_FILE_EXT = 'html'.freeze
@@ -29,7 +29,7 @@ class FetchUrl
 
       html_content = fetch_html_from_url(url)
 
-      file_path = FileUtils.mkdir_p(base_dir).first
+      file_path = FileUtils.mkdir_p(base_dir + "/output").first
 
       File.open(file_path + "/#{filename}", 'w') do |file|
         file.puts html_content
@@ -49,12 +49,12 @@ class FetchUrl
     html_content = nil
 
     begin
-      html_content = open(url).read
+      html_content = URI.open(url).read
     rescue OpenURI::HTTPError => e
       if e.message =~ /^301/
         # The URL has been moved permanently; get the new location
         new_location = e.io.meta['location']
-        html_content = open(new_location).read if new_location
+        html_content = URI.open(new_location).read if new_location
       end
     end
 
